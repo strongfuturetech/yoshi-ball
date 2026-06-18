@@ -2,7 +2,8 @@
     "name": "Yoshi Ball",
     "description": "",
     "dependencies": {
-        "device": "*"
+        "device": "*",
+        "darts": "*"
     },
     "files": [
         "main.blocks",

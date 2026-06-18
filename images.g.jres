@@ -9,6 +9,16 @@
         "mimeType": "image/x-mkcd-f4",
         "displayName": "gameBG"
     },
+    "image3": {
+        "data": "hwQQABAAAAAAAMDMzAwAAADA7P7uzgwAAOzu+7vrzgDA/rtET7T+DOC0T0RPRO8MTET0////tM5MRERET0REzvxERERPRETETP//T09E9M9MRET0//9PxExERERPRETEUERERE9ERAzARfT//0TEDABcT0RP/8wAAMBM9ETEDAAAAMDMzAwAAA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "basketball"
+    },
+    "image4": {
+        "data": "hwQEAAQAAAAAAAAAIAQAAHAFAAAAAAAA",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "followerHead"
+    },
     "*": {
         "mimeType": "image/x-mkcd-f4",
         "dataEncoding": "base64",
