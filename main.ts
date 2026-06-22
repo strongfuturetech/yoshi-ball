@@ -6,16 +6,12 @@ namespace SpriteKind {
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Pickup, function (sprite, otherSprite) {
     otherSprite.setKind(SpriteKind.Follower)
-    otherSprite.setFlag(SpriteFlag.Ghost, true)
-    if (following.length == 0) {
-        otherSprite.follow(followerSprite, 60)
-    } else {
-        otherSprite.follow(following[following.length - 1], 60)
-    }
+    otherSprite.setFlag(SpriteFlag.Ghost, false)
+    otherSprite.ay = 100
     following.push(otherSprite)
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    yoshi.vy = -95
+    yoshi.vy = -115
 })
 function calcDistFromPlayer (sprite: Sprite) {
     distanceFromPlayer = Math.sqrt((sprite.x - yoshi.x) ** 2 + (sprite.y - yoshi.y) ** 2)
@@ -37,7 +33,6 @@ let followerToCheck: Sprite = null
 let ball: Sprite = null
 let distFromLeader = 0
 let distanceFromPlayer = 0
-let followerSprite: Sprite = null
 let following: Sprite[] = []
 let yoshi: Sprite = null
 tiles.setCurrentTilemap(tilemap`level1`)
@@ -47,27 +42,19 @@ controller.moveSprite(yoshi, 70, 0)
 scene.cameraFollowSprite(yoshi)
 spawnBasketballs()
 following = []
-followerSprite = sprites.create(assets.image`followerHead`, SpriteKind.Tool)
-followerSprite.z = 25
-followerSprite.ay = 150
 let followDistance = 20
 // Chain Follow
 game.onUpdate(function () {
-    if (calcSpriteDist(followerSprite, yoshi) > followDistance) {
-        followerSprite.follow(yoshi)
-    } else {
-        followerSprite.unfollow()
-    }
     if (following.length > 0) {
         for (let index = 0; index <= following.length - 1; index++) {
             followerToCheck = following[index]
             if (index - 1 == -1) {
-                leaderToCheck = followerSprite
+                leaderToCheck = yoshi
             } else {
                 leaderToCheck = following[index - 1]
             }
             if (calcSpriteDist(followerToCheck, leaderToCheck) > followDistance) {
-                followerToCheck.follow(leaderToCheck)
+                followerToCheck.follow(leaderToCheck, 75)
             } else {
                 followerToCheck.unfollow()
             }
