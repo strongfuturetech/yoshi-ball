@@ -58,20 +58,19 @@ game.onUpdate(function () {
     } else {
         followerSprite.unfollow()
     }
-    for (let index = 0; index <= following.length; index++) {
-        if (following.length == 0) {
-            break;
-        }
-        followerToCheck = following[index]
-        if (index - 1 == -1) {
-            leaderToCheck = followerSprite
-        } else {
-            leaderToCheck = following[index - 1]
-        }
-        if (calcSpriteDist(followerToCheck, leaderToCheck) > followDistance) {
-            followerToCheck.follow(leaderToCheck)
-        } else {
-            followerToCheck.unfollow()
+    if (following.length > 0) {
+        for (let index = 0; index <= following.length - 1; index++) {
+            followerToCheck = following[index]
+            if (index - 1 == -1) {
+                leaderToCheck = followerSprite
+            } else {
+                leaderToCheck = following[index - 1]
+            }
+            if (calcSpriteDist(followerToCheck, leaderToCheck) > followDistance) {
+                followerToCheck.follow(leaderToCheck)
+            } else {
+                followerToCheck.unfollow()
+            }
         }
     }
 })
