@@ -16,16 +16,29 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
         pick = following.pop()
         pick.unfollow()
         ballToShoot = darts.create(pick.image, SpriteKind.Pickup)
-        // we're gonna need to know which way Yoshi is facing so we can put it on the right side.
-        ballToShoot.setPosition(yoshi.x + 25, yoshi.y)
         // Maybe we'll introduce a more interesting despawn anim later
-        pick.scale += -0.75
+        pick.scale += -0.25
         sprites.destroy(pick, effects.confetti, 500)
+        if (playerFacingLeft) {
+            // we're gonna need to know which way Yoshi is facing so we can put it on the right side.
+            ballToShoot.setPosition(yoshi.x - 25, yoshi.y)
+            ballToShoot.angle = 180
+        } else {
+            // we're gonna need to know which way Yoshi is facing so we can put it on the right side.
+            ballToShoot.setPosition(yoshi.x + 25, yoshi.y)
+            ballToShoot.angle = 0
+        }
     }
 })
 // I do want to borrow that "attempt jump" code
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     yoshi.vy = -115
+})
+controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (!(playerFacingLeft)) {
+        playerFacingLeft = true
+        spriteFx.flipHorizontal(yoshi)
+    }
 })
 function calcDistFromPlayer (sprite: Sprite) {
     distanceFromPlayer = Math.sqrt((sprite.x - yoshi.x) ** 2 + (sprite.y - yoshi.y) ** 2)
@@ -46,6 +59,12 @@ function spawnBasketballs () {
         tiles.setTileAt(ballSpot, assets.tile`baseTransparency16`)
     }
 }
+controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (playerFacingLeft) {
+        playerFacingLeft = false
+        spriteFx.flipHorizontal(yoshi)
+    }
+})
 controller.B.onEvent(ControllerButtonEvent.Released, function () {
     ballToShoot.throwDart()
 })
@@ -56,6 +75,7 @@ let distFromLeader = 0
 let distanceFromPlayer = 0
 let ballToShoot: Dart = null
 let pick: Sprite = null
+let playerFacingLeft = false
 let following: Sprite[] = []
 let yoshi: Sprite = null
 scene.setBackgroundImage(assets.image`gameBG`)
@@ -67,6 +87,7 @@ scene.cameraFollowSprite(yoshi)
 spawnBasketballs()
 following = []
 let followDistance = 20
+playerFacingLeft = true
 // Chain Follow
 game.onUpdate(function () {
     if (following.length > 0) {
@@ -83,5 +104,12 @@ game.onUpdate(function () {
                 followerToCheck.unfollow()
             }
         }
+    }
+})
+// Player Animations and Facing Direciton
+game.onUpdate(function () {
+    let flippedPlayer = 0
+    if (playerFacingLeft && !(flippedPlayer)) {
+    	
     }
 })
