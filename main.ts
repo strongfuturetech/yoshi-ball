@@ -3,6 +3,15 @@ namespace SpriteKind {
     export const Debug = SpriteKind.create()
     export const Tool = SpriteKind.create()
     export const Follower = SpriteKind.create()
+    export const Hoop = SpriteKind.create()
+}
+function spawnHoops () {
+    for (let hoopSpot of tiles.getTilesByType(sprites.jewels.jewel5)) {
+        hoop = sprites.create(assets.image`hoop`, SpriteKind.Hoop)
+        hoop.setScale(1.5, ScaleAnchor.Middle)
+        tiles.placeOnTile(hoop, hoopSpot)
+        tiles.setTileAt(hoopSpot, assets.tile`baseTransparency16`)
+    }
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Pickup, function (sprite, otherSprite) {
     otherSprite.setKind(SpriteKind.Follower)
@@ -15,17 +24,17 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     if (following.length > 0) {
         pick = following.pop()
         pick.unfollow()
-        ballToShoot = darts.create(pick.image, SpriteKind.Pickup)
+        ballToShoot = darts.create(pick.image, SpriteKind.Projectile)
         // Maybe we'll introduce a more interesting despawn anim later
         pick.scale += -0.25
         sprites.destroy(pick, effects.confetti, 500)
         if (playerFacingLeft) {
             // we're gonna need to know which way Yoshi is facing so we can put it on the right side.
-            ballToShoot.setPosition(yoshi.x - 25, yoshi.y)
+            ballToShoot.setPosition(yoshi.x - 20, yoshi.y - 10)
             ballToShoot.angle = 180
         } else {
             // we're gonna need to know which way Yoshi is facing so we can put it on the right side.
-            ballToShoot.setPosition(yoshi.x + 25, yoshi.y)
+            ballToShoot.setPosition(yoshi.x + 20, yoshi.y - 10)
             ballToShoot.angle = 0
         }
     }
@@ -33,6 +42,18 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
 // I do want to borrow that "attempt jump" code
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     yoshi.vy = -115
+})
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Hoop, function (sprite, otherSprite) {
+    yoshi.sayText(":)")
+    if (calcDistFromPlayer(otherSprite) >= 50) {
+        info.changeScoreBy(3)
+    } else if (calcDistFromPlayer(otherSprite) >= 25) {
+        info.changeScoreBy(2)
+    } else {
+        info.changeScoreBy(1)
+    }
+    sprites.destroy(sprite, effects.trail, 500)
+    sprites.destroy(otherSprite, effects.confetti, 1000)
 })
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     if (!(playerFacingLeft)) {
@@ -49,12 +70,14 @@ function calcSpriteDist (follower: Sprite, leader: Sprite) {
     return distFromLeader
 }
 controller.B.onEvent(ControllerButtonEvent.Repeated, function () {
-    ballToShoot.pow += 10
+    ballToShoot.pow += 20
     pause(100)
 })
 function spawnBasketballs () {
     for (let ballSpot of tiles.getTilesByType(sprites.jewels.jewel2)) {
         ball = sprites.create(assets.image`basketball`, SpriteKind.Pickup)
+        // Doesn't help with bouncing off a side wall and vibrates on the floor...
+        ball.setBounceOnWall(true)
         tiles.placeOnTile(ball, ballSpot)
         tiles.setTileAt(ballSpot, assets.tile`baseTransparency16`)
     }
@@ -68,6 +91,9 @@ controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
 controller.B.onEvent(ControllerButtonEvent.Released, function () {
     ballToShoot.throwDart()
 })
+scene.onHitWall(SpriteKind.Projectile, function (sprite, location) {
+    sprite.setKind(SpriteKind.Pickup)
+})
 let leaderToCheck: Sprite = null
 let followerToCheck: Sprite = null
 let ball: Sprite = null
@@ -75,6 +101,7 @@ let distFromLeader = 0
 let distanceFromPlayer = 0
 let ballToShoot: Dart = null
 let pick: Sprite = null
+let hoop: Sprite = null
 let playerFacingLeft = false
 let following: Sprite[] = []
 let yoshi: Sprite = null
@@ -85,9 +112,11 @@ yoshi.ay = 300
 controller.moveSprite(yoshi, 70, 0)
 scene.cameraFollowSprite(yoshi)
 spawnBasketballs()
+spawnHoops()
 following = []
 let followDistance = 20
 playerFacingLeft = true
+info.setScore(0)
 // Chain Follow
 game.onUpdate(function () {
     if (following.length > 0) {

@@ -19,6 +19,11 @@
         "mimeType": "image/x-mkcd-f4",
         "displayName": "followerHead"
     },
+    "image5": {
+        "data": "hwQQABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACIiIgIAAAAiNDMzIwAAIEIuIiIyAgAg5AAAACAuACACAAAAAD4CICMCAADgNAIgMyMiIk4zAiAzMzMzMyMAACI1MzMzAgAAACIiIiIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "hoop"
+    },
     "anim6": {
         "namespace": "myAnimations",
         "id": "anim6",
