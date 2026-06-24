@@ -39,12 +39,16 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
         }
     }
 })
-// I do want to borrow that "attempt jump" code
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    yoshi.vy = -115
+    if (yoshi.isHittingTile(CollisionDirection.Bottom)) {
+        yoshi.vy = -125
+    } else if (!(yoshi.isHittingTile(CollisionDirection.Bottom)) && canDblJump) {
+        yoshi.vy = -95
+        canDblJump = false
+    }
 })
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Hoop, function (sprite, otherSprite) {
-    yoshi.sayText(":)")
+    yoshi.sayText(":D", 500, false)
     if (calcDistFromPlayer(otherSprite) >= 50) {
         info.changeScoreBy(3)
     } else if (calcDistFromPlayer(otherSprite) >= 25) {
@@ -102,6 +106,7 @@ let distanceFromPlayer = 0
 let ballToShoot: Dart = null
 let pick: Sprite = null
 let hoop: Sprite = null
+let canDblJump = false
 let playerFacingLeft = false
 let following: Sprite[] = []
 let yoshi: Sprite = null
@@ -116,6 +121,7 @@ spawnHoops()
 following = []
 let followDistance = 20
 playerFacingLeft = true
+canDblJump = false
 info.setScore(0)
 // Chain Follow
 game.onUpdate(function () {
@@ -135,9 +141,14 @@ game.onUpdate(function () {
         }
     }
 })
-// Player Animations and Facing Direciton
+// Player Animations
+// Facing Direction
+// Etc.
 game.onUpdate(function () {
     let flippedPlayer = 0
+    if (yoshi.isHittingTile(CollisionDirection.Bottom)) {
+        canDblJump = true
+    }
     if (playerFacingLeft && !(flippedPlayer)) {
     	
     }
