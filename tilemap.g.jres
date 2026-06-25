@@ -5,12 +5,6 @@
         "tilemapTile": true,
         "displayName": "baseTransparency16"
     },
-    "tile1": {
-        "data": "hwQQABAAAAD//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////w==",
-        "mimeType": "image/x-mkcd-f4",
-        "tilemapTile": true,
-        "displayName": "myTile5"
-    },
     "level1": {
         "id": "level1",
         "mimeType": "application/mkcd-tilemap",

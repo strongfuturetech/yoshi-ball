@@ -17,7 +17,6 @@ function spawnHoops () {
     }
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Pickup, function (sprite, otherSprite) {
-    music.play(music.melodyPlayable(music.jumpUp), music.PlaybackMode.InBackground)
     otherSprite.setKind(SpriteKind.Follower)
     // Turn this on if losing the connection is more common.
     otherSprite.setFlag(SpriteFlag.Ghost, false)
@@ -48,10 +47,8 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (yoshi.isHittingTile(CollisionDirection.Bottom)) {
-        music.play(music.createSoundEffect(WaveShape.Sine, 400, 600, 255, 0, 100, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
         yoshi.vy = -125
     } else if (!(yoshi.isHittingTile(CollisionDirection.Bottom)) && canDblJump) {
-        music.play(music.createSoundEffect(WaveShape.Sine, 400, 600, 255, 0, 100, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
         yoshi.vy = -95
         canDblJump = false
     }
@@ -86,12 +83,10 @@ function calcDistFromPlayer (sprite: Sprite) {
     return distanceFromPlayer
 }
 statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ, statusbars.ComparisonType.Fixed, 100, function (status) {
-    music.play(music.createSoundEffect(WaveShape.Triangle, 549, 1987, 255, 0, 150, SoundExpressionEffect.Tremolo, InterpolationCurve.Curve), music.PlaybackMode.UntilDone)
     maxPowerReached = true
 })
 info.onCountdownEnd(function () {
     if (sprites.allOfKind(SpriteKind.Hoop).length > 0) {
-        music.play(music.melodyPlayable(music.sonar), music.PlaybackMode.UntilDone)
         sprites.destroyAllSpritesOfKind(SpriteKind.Hoop, effects.spray, 500)
         sprites.destroyAllSpritesOfKind(SpriteKind.Follower, effects.ashes, 500)
         game.setGameOverScoringType(game.ScoringType.HighScore)
