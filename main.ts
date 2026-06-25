@@ -5,6 +5,9 @@ namespace SpriteKind {
     export const Follower = SpriteKind.create()
     export const Hoop = SpriteKind.create()
 }
+namespace StatusBarKind {
+    export const Power = StatusBarKind.create()
+}
 function spawnHoops () {
     for (let hoopSpot of tiles.getTilesByType(sprites.jewels.jewel5)) {
         hoop = sprites.create(assets.image`hoop`, SpriteKind.Hoop)
@@ -22,6 +25,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Pickup, function (sprite, otherS
 })
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     if (following.length > 0) {
+        playerIsShooting = true
         pick = following.pop()
         pick.unfollow()
         ballToShoot = darts.create(pick.image, SpriteKind.Projectile)
@@ -51,15 +55,21 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Hoop, function (sprite, otherSprite) {
     yoshi.sayText(":D", 500, false)
-    if (calcDistFromPlayer(otherSprite) >= 50) {
+    if (calcDistFromPlayer(otherSprite) >= 75) {
         info.changeScoreBy(3)
-    } else if (calcDistFromPlayer(otherSprite) >= 25) {
+    } else if (calcDistFromPlayer(otherSprite) >= 38) {
         info.changeScoreBy(2)
     } else {
         info.changeScoreBy(1)
     }
     sprites.destroy(sprite, effects.warmRadial, 500)
     sprites.destroy(otherSprite, effects.confetti, 1000)
+    pause(1000)
+    if (sprites.allOfKind(SpriteKind.Hoop).length == 0) {
+        game.showLongText("Stage Complete!", DialogLayout.Center)
+        currentMap += 1
+        selectMap(currentMap)
+    }
 })
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     if (!(playerFacingLeft)) {
@@ -71,13 +81,19 @@ function calcDistFromPlayer (sprite: Sprite) {
     distanceFromPlayer = Math.sqrt((sprite.x - yoshi.x) ** 2 + (sprite.y - yoshi.y) ** 2)
     return distanceFromPlayer
 }
+statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ, statusbars.ComparisonType.Fixed, 100, function (status) {
+    maxPowerReached = true
+})
 function calcSpriteDist (follower: Sprite, leader: Sprite) {
     distFromLeader = Math.sqrt((follower.x - leader.x) ** 2 + (follower.y - leader.y) ** 2)
     return distFromLeader
 }
 controller.B.onEvent(ControllerButtonEvent.Repeated, function () {
-    ballToShoot.pow += 20
-    pause(100)
+    if (playerIsShooting && !(maxPowerReached)) {
+        ballToShoot.pow += 20
+        statusbar.value += 10
+        pause(100)
+    }
 })
 function spawnBasketballs () {
     for (let ballSpot of tiles.getTilesByType(sprites.jewels.jewel2)) {
@@ -96,38 +112,79 @@ controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     }
 })
 controller.B.onEvent(ControllerButtonEvent.Released, function () {
-    ballToShoot.throwDart()
-    ballToShoot.ay = gravity
+    if (playerIsShooting) {
+        ballToShoot.throwDart()
+        ballToShoot.ay = gravity
+        statusbar.value = 0
+        playerIsShooting = false
+        maxPowerReached = false
+    }
 })
+function selectMap (map: number) {
+    if (map > 1) {
+        sprites.destroy(yoshi)
+    }
+    if (map == 1) {
+        tiles.setCurrentTilemap(tilemap`level1`)
+    } else if (map == 2) {
+        tiles.setCurrentTilemap(tilemap`level2`)
+    } else {
+        console.log("Add remaining time to points")
+        game.setGameOverEffect(true, effects.confetti)
+        game.setGameOverScoringType(game.ScoringType.HighScore)
+        game.setGameOverMessage(true, "Finished!")
+        game.gameOver(true)
+        return
+    }
+    createPlayer()
+    spawnBasketballs()
+    spawnHoops()
+    following = []
+    canDblJump = false
+    maxPowerReached = false
+}
 scene.onHitWall(SpriteKind.Projectile, function (sprite, location) {
     sprite.setKind(SpriteKind.Pickup)
 })
+function createPlayer () {
+    yoshi = sprites.create(assets.image`yoshi`, SpriteKind.Player)
+    yoshi.ay = gravity
+    controller.moveSprite(yoshi, 90, 0)
+    scene.cameraFollowSprite(yoshi)
+    playerFacingLeft = true
+}
+function createPowerBar () {
+    statusbar = statusbars.create(40, 8, StatusBarKind.Power)
+    statusbar.value = 0
+    statusbar.setColor(9, 11, 3)
+    statusbar.setBarBorder(2, 12)
+    statusbar.setStatusBarFlag(StatusBarFlag.SmoothTransition, true)
+    statusbar.positionDirection(CollisionDirection.Bottom)
+    statusbar.setOffsetPadding(0, 3)
+}
 let leaderToCheck: Sprite = null
 let followerToCheck: Sprite = null
 let ball: Sprite = null
+let statusbar: StatusBarSprite = null
 let distFromLeader = 0
+let maxPowerReached = false
 let distanceFromPlayer = 0
+let canDblJump = false
+let yoshi: Sprite = null
+let playerFacingLeft = false
 let ballToShoot: Dart = null
 let pick: Sprite = null
-let hoop: Sprite = null
-let canDblJump = false
-let playerFacingLeft = false
+let playerIsShooting = false
 let following: Sprite[] = []
-let yoshi: Sprite = null
+let hoop: Sprite = null
+let currentMap = 0
 let gravity = 0
 scene.setBackgroundImage(assets.image`gameBG`)
-tiles.setCurrentTilemap(tilemap`level1`)
 gravity = 300
-yoshi = sprites.create(assets.image`yoshi`, SpriteKind.Player)
-yoshi.ay = gravity
-controller.moveSprite(yoshi, 90, 0)
-scene.cameraFollowSprite(yoshi)
-spawnBasketballs()
-spawnHoops()
-following = []
+currentMap = 1
+selectMap(currentMap)
 let followDistance = 20
-playerFacingLeft = true
-canDblJump = false
+createPowerBar()
 info.setScore(0)
 // Chain Follow
 game.onUpdate(function () {
@@ -159,20 +216,11 @@ game.onUpdate(function () {
     	
     }
 })
-// Help the basketballs nav the level
+// Help the basketballs nav the level... kinda.
 game.onUpdate(function () {
     for (let value of following) {
-        // ball is on the ground
-        // 
-        // 
-        // 
-        // ball is stuck on the wall (and may move with the player?)
         if (value.isHittingTile(CollisionDirection.Bottom)) {
             value.vy = -45
-        } else if (value.isHittingTile(CollisionDirection.Left)) {
-            console.log("Wall to left of ball!")
-        } else if (value.isHittingTile(CollisionDirection.Right)) {
-            console.log("Wall to right of ball!")
         }
     }
 })

@@ -4,7 +4,8 @@
     "dependencies": {
         "device": "*",
         "darts": "*",
-        "sprite-fx": "github:kohanmathers/makecodespritefx#v1.3.0"
+        "sprite-fx": "github:kohanmathers/makecodespritefx#v1.3.0",
+        "pxt-status-bar": "github:jwunderl/pxt-status-bar#v0.4.2"
     },
     "files": [
         "main.blocks",
