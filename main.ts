@@ -25,9 +25,11 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
         pick = following.pop()
         pick.unfollow()
         ballToShoot = darts.create(pick.image, SpriteKind.Projectile)
+        ballToShoot.pow = 40
+        ballToShoot.setBounceOnWall(true)
         // Maybe we'll introduce a more interesting despawn anim later
         pick.scale += -0.25
-        sprites.destroy(pick, effects.confetti, 500)
+        sprites.destroy(pick, effects.warmRadial, 500)
         if (playerFacingLeft) {
             // we're gonna need to know which way Yoshi is facing so we can put it on the right side.
             ballToShoot.setPosition(yoshi.x - 20, yoshi.y - 10)
@@ -56,7 +58,7 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Hoop, function (sprite, othe
     } else {
         info.changeScoreBy(1)
     }
-    sprites.destroy(sprite, effects.trail, 500)
+    sprites.destroy(sprite, effects.warmRadial, 500)
     sprites.destroy(otherSprite, effects.confetti, 1000)
 })
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -80,8 +82,9 @@ controller.B.onEvent(ControllerButtonEvent.Repeated, function () {
 function spawnBasketballs () {
     for (let ballSpot of tiles.getTilesByType(sprites.jewels.jewel2)) {
         ball = sprites.create(assets.image`basketball`, SpriteKind.Pickup)
-        // Doesn't help with bouncing off a side wall and vibrates on the floor...
-        ball.setBounceOnWall(true)
+        // Vibrates on the floor...
+        ball.setBounceOnWall(false)
+        ball.ay = gravity / 4
         tiles.placeOnTile(ball, ballSpot)
         tiles.setTileAt(ballSpot, assets.tile`baseTransparency16`)
     }
@@ -94,6 +97,7 @@ controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 controller.B.onEvent(ControllerButtonEvent.Released, function () {
     ballToShoot.throwDart()
+    ballToShoot.ay = gravity
 })
 scene.onHitWall(SpriteKind.Projectile, function (sprite, location) {
     sprite.setKind(SpriteKind.Pickup)
@@ -110,11 +114,13 @@ let canDblJump = false
 let playerFacingLeft = false
 let following: Sprite[] = []
 let yoshi: Sprite = null
+let gravity = 0
 scene.setBackgroundImage(assets.image`gameBG`)
 tiles.setCurrentTilemap(tilemap`level1`)
+gravity = 300
 yoshi = sprites.create(assets.image`yoshi`, SpriteKind.Player)
-yoshi.ay = 300
-controller.moveSprite(yoshi, 70, 0)
+yoshi.ay = gravity
+controller.moveSprite(yoshi, 90, 0)
 scene.cameraFollowSprite(yoshi)
 spawnBasketballs()
 spawnHoops()
@@ -134,7 +140,7 @@ game.onUpdate(function () {
                 leaderToCheck = following[index - 1]
             }
             if (calcSpriteDist(followerToCheck, leaderToCheck) > followDistance) {
-                followerToCheck.follow(leaderToCheck, 100)
+                followerToCheck.follow(leaderToCheck, 110)
             } else {
                 followerToCheck.unfollow()
             }
@@ -151,5 +157,22 @@ game.onUpdate(function () {
     }
     if (playerFacingLeft && !(flippedPlayer)) {
     	
+    }
+})
+// Help the basketballs nav the level
+game.onUpdate(function () {
+    for (let value of following) {
+        // ball is on the ground
+        // 
+        // 
+        // 
+        // ball is stuck on the wall (and may move with the player?)
+        if (value.isHittingTile(CollisionDirection.Bottom)) {
+            value.vy = -45
+        } else if (value.isHittingTile(CollisionDirection.Left)) {
+            console.log("Wall to left of ball!")
+        } else if (value.isHittingTile(CollisionDirection.Right)) {
+            console.log("Wall to right of ball!")
+        }
     }
 })
