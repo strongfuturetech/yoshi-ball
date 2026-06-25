@@ -17,6 +17,7 @@ function spawnHoops () {
     }
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Pickup, function (sprite, otherSprite) {
+    music.play(music.melodyPlayable(music.baDing), music.PlaybackMode.InBackground)
     otherSprite.setKind(SpriteKind.Follower)
     // Turn this on if losing the connection is more common.
     otherSprite.setFlag(SpriteFlag.Ghost, false)
@@ -47,14 +48,17 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (yoshi.isHittingTile(CollisionDirection.Bottom)) {
+        music.play(music.melodyPlayable(music.jumpUp), music.PlaybackMode.InBackground)
         yoshi.vy = -125
     } else if (!(yoshi.isHittingTile(CollisionDirection.Bottom)) && canDblJump) {
+        music.play(music.melodyPlayable(music.jumpUp), music.PlaybackMode.InBackground)
         yoshi.vy = -95
         canDblJump = false
     }
 })
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Hoop, function (sprite, otherSprite) {
     yoshi.sayText(":D", 500, false)
+    music.play(music.melodyPlayable(music.baDing), music.PlaybackMode.InBackground)
     if (calcDistFromPlayer(otherSprite) >= 75) {
         info.changeScoreBy(3)
     } else if (calcDistFromPlayer(otherSprite) >= 38) {
@@ -138,8 +142,10 @@ function selectMap (map: number) {
     }
     if (map == 1) {
         tiles.setCurrentTilemap(tilemap`level1`)
+        info.startCountdown(45)
     } else if (map == 2) {
         tiles.setCurrentTilemap(tilemap`level2`)
+        info.startCountdown(60)
     } else {
         game.setGameOverEffect(true, effects.confetti)
         game.setGameOverScoringType(game.ScoringType.HighScore)
@@ -153,7 +159,6 @@ function selectMap (map: number) {
     following = []
     canDblJump = false
     maxPowerReached = false
-    info.startCountdown(45)
 }
 scene.onHitWall(SpriteKind.Projectile, function (sprite, location) {
     sprite.setKind(SpriteKind.Pickup)
@@ -204,7 +209,6 @@ createPowerBar()
 pause(650)
 game.showLongText("Use the B button to shoot (hold it to charge!)", DialogLayout.Bottom)
 info.setScore(0)
-info.startCountdown(45)
 // Chain Follow
 game.onUpdate(function () {
     if (following.length > 0) {
