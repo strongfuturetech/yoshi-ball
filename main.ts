@@ -84,6 +84,17 @@ function calcDistFromPlayer (sprite: Sprite) {
 statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ, statusbars.ComparisonType.Fixed, 100, function (status) {
     maxPowerReached = true
 })
+info.onCountdownEnd(function () {
+    if (sprites.allOfKind(SpriteKind.Hoop).length > 0) {
+        music.play(music.melodyPlayable(music.sonar), music.PlaybackMode.UntilDone)
+        sprites.destroyAllSpritesOfKind(SpriteKind.Hoop, effects.spray, 500)
+        sprites.destroyAllSpritesOfKind(SpriteKind.Follower, effects.ashes, 500)
+        game.setGameOverScoringType(game.ScoringType.HighScore)
+        game.setGameOverEffect(false, effects.blizzard)
+        game.setGameOverMessage(false, "Time's Up!")
+        game.gameOver(false)
+    }
+})
 function calcSpriteDist (follower: Sprite, leader: Sprite) {
     distFromLeader = Math.sqrt((follower.x - leader.x) ** 2 + (follower.y - leader.y) ** 2)
     return distFromLeader
@@ -122,6 +133,7 @@ controller.B.onEvent(ControllerButtonEvent.Released, function () {
 })
 function selectMap (map: number) {
     if (map > 1) {
+        info.changeScoreBy(info.countdown())
         sprites.destroy(yoshi)
     }
     if (map == 1) {
@@ -129,7 +141,6 @@ function selectMap (map: number) {
     } else if (map == 2) {
         tiles.setCurrentTilemap(tilemap`level2`)
     } else {
-        console.log("Add remaining time to points")
         game.setGameOverEffect(true, effects.confetti)
         game.setGameOverScoringType(game.ScoringType.HighScore)
         game.setGameOverMessage(true, "Finished!")
@@ -142,6 +153,7 @@ function selectMap (map: number) {
     following = []
     canDblJump = false
     maxPowerReached = false
+    info.startCountdown(45)
 }
 scene.onHitWall(SpriteKind.Projectile, function (sprite, location) {
     sprite.setKind(SpriteKind.Pickup)
@@ -180,12 +192,19 @@ let hoop: Sprite = null
 let currentMap = 0
 let gravity = 0
 scene.setBackgroundImage(assets.image`gameBG`)
+game.splash("Puppy's Day in the Park")
 gravity = 300
 currentMap = 1
 selectMap(currentMap)
 let followDistance = 20
+pause(650)
+game.showLongText("Find basketballs around the level to throw in the hoops.", DialogLayout.Full)
+music.play(music.melodyPlayable(music.beamUp), music.PlaybackMode.UntilDone)
 createPowerBar()
+pause(650)
+game.showLongText("Use the B button to shoot (hold it to charge!)", DialogLayout.Bottom)
 info.setScore(0)
+info.startCountdown(45)
 // Chain Follow
 game.onUpdate(function () {
     if (following.length > 0) {
