@@ -17,7 +17,7 @@ function spawnHoops () {
     }
 }
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Pickup, function (sprite, otherSprite) {
-    music.play(music.melodyPlayable(music.baDing), music.PlaybackMode.InBackground)
+    music.play(music.melodyPlayable(music.jumpUp), music.PlaybackMode.InBackground)
     otherSprite.setKind(SpriteKind.Follower)
     // Turn this on if losing the connection is more common.
     otherSprite.setFlag(SpriteFlag.Ghost, false)
@@ -48,10 +48,10 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (yoshi.isHittingTile(CollisionDirection.Bottom)) {
-        music.play(music.melodyPlayable(music.jumpUp), music.PlaybackMode.InBackground)
+        music.play(music.createSoundEffect(WaveShape.Sine, 400, 600, 255, 0, 100, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
         yoshi.vy = -125
     } else if (!(yoshi.isHittingTile(CollisionDirection.Bottom)) && canDblJump) {
-        music.play(music.melodyPlayable(music.jumpUp), music.PlaybackMode.InBackground)
+        music.play(music.createSoundEffect(WaveShape.Sine, 400, 600, 255, 0, 100, SoundExpressionEffect.None, InterpolationCurve.Linear), music.PlaybackMode.UntilDone)
         yoshi.vy = -95
         canDblJump = false
     }
@@ -86,6 +86,7 @@ function calcDistFromPlayer (sprite: Sprite) {
     return distanceFromPlayer
 }
 statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.EQ, statusbars.ComparisonType.Fixed, 100, function (status) {
+    music.play(music.createSoundEffect(WaveShape.Triangle, 549, 1987, 255, 0, 150, SoundExpressionEffect.Tremolo, InterpolationCurve.Curve), music.PlaybackMode.UntilDone)
     maxPowerReached = true
 })
 info.onCountdownEnd(function () {
@@ -142,7 +143,6 @@ function selectMap (map: number) {
     }
     if (map == 1) {
         tiles.setCurrentTilemap(tilemap`level1`)
-        info.startCountdown(45)
     } else if (map == 2) {
         tiles.setCurrentTilemap(tilemap`level2`)
         info.startCountdown(60)
@@ -209,6 +209,7 @@ createPowerBar()
 pause(650)
 game.showLongText("Use the B button to shoot (hold it to charge!)", DialogLayout.Bottom)
 info.setScore(0)
+info.startCountdown(45)
 // Chain Follow
 game.onUpdate(function () {
     if (following.length > 0) {
